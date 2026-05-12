@@ -7,6 +7,8 @@ A conversational AI agent that lets you query IPL cricket data (2008–2024) usi
 ![Groq](https://img.shields.io/badge/LLM-Groq%20Llama3-orange)
 ![SQLite](https://img.shields.io/badge/Database-SQLite-lightgrey?logo=sqlite)
 
+🚀 **[Live Demo → ipl-stats-ai.streamlit.app](https://ipl-stats-ai.streamlit.app)**
+
 ## Demo
 
 > **You:** bumrah ne 2024 mein kitne wicket liye  
