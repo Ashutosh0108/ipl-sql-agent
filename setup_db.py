@@ -1,21 +1,26 @@
 import pandas as pd
 import sqlite3
 
-conn = sqlite3.connect("ipl.db")
+DB_PATH = "ipl.db"
 
-matches = pd.read_csv("matches.csv")
-deliveries = pd.read_csv("deliveries.csv")
+def setup():
+    conn = sqlite3.connect(DB_PATH)
 
-matches.to_sql("matches", conn, if_exists="replace", index=False)
-deliveries.to_sql("deliveries", conn, if_exists="replace", index=False)
+    matches = pd.read_csv("matches.csv")
+    deliveries = pd.read_csv("deliveries.csv")
 
-cursor = conn.cursor()
-cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
-print("Tables:", cursor.fetchall())
-print("\nMatches columns:", matches.columns.tolist())
-print("\nDeliveries columns:", deliveries.columns.tolist())
-print("\nSample match row:")
-print(matches.head(1).to_dict(orient="records"))
+    matches.to_sql("matches", conn, if_exists="replace", index=False)
+    deliveries.to_sql("deliveries", conn, if_exists="replace", index=False)
 
-conn.close()
-print("\nDone! ipl.db is ready.")
+    cursor = conn.cursor()
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+    print("Tables:", cursor.fetchall())
+    print("Matches columns:", matches.columns.tolist())
+    print("Deliveries columns:", deliveries.columns.tolist())
+    print("Sample match row:", matches.head(1).to_dict(orient="records"))
+
+    conn.close()
+    print("Done! ipl.db is ready.")
+
+if __name__ == "__main__":
+    setup()
