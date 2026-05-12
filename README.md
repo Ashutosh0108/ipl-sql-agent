@@ -1,6 +1,6 @@
 # 🏏 IPL SQL Agent
 
-A conversational AI agent that lets you query IPL cricket data (2008–2024) using plain English, Hindi, or broken English — no SQL knowledge needed.
+A conversational AI agent that lets you query 17 years of IPL data (2008–2024) in plain English, Hindi, or broken English — no SQL knowledge needed.
 
 ![Python](https://img.shields.io/badge/Python-3.11+-blue?logo=python)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.57-red?logo=streamlit)
@@ -9,38 +9,59 @@ A conversational AI agent that lets you query IPL cricket data (2008–2024) usi
 
 🚀 **[Live Demo → ipl-stats-ai.streamlit.app](https://ipl-stats-ai.streamlit.app)**
 
+---
+
+## Architecture
+
+The agent uses a 3-step agentic pipeline with automatic error recovery and conversation memory:
+
+```
+User Input (any language/grammar)
+        ↓
+Step 1 — Intent Clarification
+  Resolves nicknames, Hindi-English mix, typos, follow-up pronouns
+  "Virat" → "V Kohli", "2020 IPL" → season = '2020/21'
+  "what about him?" → resolved from conversation history
+        ↓
+Step 2 — SQL Generation
+  Writes SQLite query against 900,000+ delivery records
+  Auto-retry on failure — shows error to LLM, asks it to fix its own SQL
+  Up to 2 retry attempts before giving up
+        ↓
+Step 3 — Answer Generation
+  Converts raw query results into natural language
+  Matches the user's input language (Hindi in → Hindi out)
+  Structured format: bold key stat + bullet points for multi-row data
+        ↓
+Response displayed + query logged to JSONL
+```
+
+---
+
 ## Demo
 
-> **You:** bumrah ne 2024 mein kitne wicket liye  
-> **Agent:** Jasprit Bumrah took 15 wickets in IPL 2024.
+> **You:** bumrah ne 2024 mein kitne wicket liye
+> **Agent:** Jasprit Bumrah ne IPL 2024 mein 15 wicket liye.
 
-> **You:** which team did he take most wickets against?  
+> **You:** which team did he take most wickets against?
 > **Agent:** Bumrah took the most wickets against Royal Challengers Bangalore — 4 wickets.
 
-> **You:** what was his economy in those matches?  
+> **You:** what was his economy in those matches?
 > **Agent:** Bumrah's economy rate against RCB in 2024 was 6.25.
 
-## How It Works
-
-The agent uses a 3-step pipeline:
-
-```
-Your question (any language/grammar)
-        ↓
-[Step 1] Intent Clarification — LLM cleans and understands your question
-        ↓
-[Step 2] SQL Generation — LLM writes the SQLite query
-        ↓
-[Step 3] Answer Generation — LLM converts raw results into a human response
-```
+---
 
 ## Features
 
 - **Broken English & Hindi support** — ask in any way you naturally speak
-- **Follow-up questions** — resolves pronouns like "him", "same season", "that team"
-- **Natural language answers** — no raw tables, just clean conversational responses
-- **SQL transparency** — click "View SQL" on any answer to see the exact query
+- **Follow-up questions** — resolves pronouns like "him", "same season", "that team" using chat history
+- **Auto-retry on SQL errors** — agent fixes its own mistakes without user intervention
+- **Query logging** — every question, SQL, success/fail, retry count saved to JSONL for analysis
+- **Natural language answers** — no raw tables, clean conversational responses
+- **SQL transparency** — click "View SQL" on any answer to see the exact query generated
 - **Per-match breakdowns** — ask for match-by-match stats for any player
+
+---
 
 ## Tech Stack
 
@@ -48,9 +69,11 @@ Your question (any language/grammar)
 |-----------|-----------|
 | LLM | Groq API (Llama 3.3 70B) |
 | UI | Streamlit |
-| Database | SQLite |
+| Database | SQLite (900K+ rows) |
 | Data | IPL 2008–2024 (Kaggle) |
 | Language | Python 3.11 |
+
+---
 
 ## Setup
 
@@ -80,21 +103,17 @@ GROQ_API_KEY=your_groq_api_key_here
 ```
 Get a free key at [console.groq.com](https://console.groq.com)
 
-**5. Download IPL dataset**
-
-Download from Kaggle: [IPL Complete Dataset 2008–2024](https://www.kaggle.com/datasets/patrickb1912/ipl-complete-dataset-20082020)
-
-Place `matches.csv` and `deliveries.csv` in the project folder.
-
-**6. Set up the database**
+**5. Set up the database**
 ```bash
 python setup_db.py
 ```
 
-**7. Run the app**
+**6. Run the app**
 ```bash
 streamlit run app.py
 ```
+
+---
 
 ## Sample Questions
 
@@ -104,5 +123,7 @@ Shami ne 2022 mein kitne wicket liye?
 Which team won the most IPL titles?
 Top 5 run scorers of 2024 IPL
 What was Kohli's strike rate in 2016?
-MI ne kitne finals jeete hain?
+List all players who scored 500+ runs in IPL 2024
+Who made the fastest century in IPL history?
+KKR ne 2024 mein kitne match jeete?
 ```
